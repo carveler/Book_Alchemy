@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 from data_models import db, Author, Book
 import os
 
@@ -25,9 +26,26 @@ def home():
     Returns:
         render_template: Rendered HTML for the home page with books data.
     """
-    books = Book.query.all()
-    print(books)
-    return render_template("home.html", books=books)
+    search_query = request.args.get("search", "").strip()
+
+    if search_query:
+        books = Book.query.join(Author).filter(
+            or_(
+                Book.title.ilike(f"%{search_query}%"),
+                Author.name.ilike(f"%{search_query}%"),
+            )
+        ).all()
+
+    else:
+        books = Book.query.all()
+    authors = Author.query.all()
+    authors_dict = {author.id: author for author in authors}
+    sort_key = request.args.get("sort", "")
+    if sort_key == "title":
+        books = sorted(books, key=lambda b: b.title)
+    elif sort_key == "author":
+        books = sorted(books, key=lambda b: authors_dict[b.author_id].name)
+    return render_template("home.html", books=books, authors=authors_dict)
 
 
 @app.route("/add_author", methods=["GET", "POST"])
