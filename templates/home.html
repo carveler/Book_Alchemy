@@ -1,16 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   </head>
   <body>
+    <form method="get" action="/">
+      <label for="sort">Sort by:</label>
+      <select name="sort" id="sort">
+        <option value="">Select</option>
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+      </select>
+      <button type="submit">Sort</button>
+    </form>
+    <ul>
+      {% for book in books %}
+      <li>
+        <div>
+          <h3>{{ book.title }} by {{ authors[book.author_id].name}}</h3>
+        </div>
 
-    {% for book in books %}
-    <div> <h3>{{ book.title }}</h3>
-    </div>
-    {% endfor %}
-
+        {% if book.isbn %}
+        <img
+          src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg"
+          alt="Cover Image"
+        />
+        {% else %}
+        <img src="default-cover.jpg" alt="Cover Image" />
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
   </body>
 </html>
