@@ -18,10 +18,14 @@ class Author(db.Model):
     date_of_death = db.Column(db.String)
 
     def __repr__(self):
-        return f"Author(id={self.id}, name={self.name}, birth_date={self.birth_date}, date_of_death={self.date_of_death})"
+        return (f"Author(id={self.id}, name={self.name}, "
+                f"birth_date={self.birth_date}, "
+                f"date_of_death={self.date_of_death})")
 
     def __str__(self):
-        return f"Author(id={self.id}, name={self.name}, birth_date={self.birth_date}, date_of_death={self.date_of_death})"
+        return (f"Author(id={self.id}, name={self.name}, "
+                f"birth_date={self.birth_date}, "
+                f"date_of_death={self.date_of_death})")
 
 
 class Book(db.Model):
@@ -34,7 +38,9 @@ class Book(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("authors.id"))
 
     def __repr__(self):
-        return f"Book(id={self.id}, title={self.title}, author_id={self.author_id})"
+        return (f"Book(id={self.id}, title={self.title}, "
+                f"author_id={self.author_id})")
 
     def __str__(self):
-        return f"Book(id={self.id}, title={self.title}, author_id={self.author_id})"
+        return (f"Book(id={self.id}, title={self.title}, "
+                f"author_id={self.author_id})")

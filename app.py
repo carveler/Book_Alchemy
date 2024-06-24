@@ -1,5 +1,4 @@
 from flask import Flask, flash, redirect, url_for, render_template, request
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from data_models import db, Author, Book
 import os
@@ -128,8 +127,8 @@ def add_book():
     return render_template("add_book.html")
 
 
-@app.route("/book/<int:id>/delete", methods=["POST"])
-def delete_book(id):
+@app.route("/book/<int:book_id>/delete", methods=["POST"])
+def delete_book(book_id):
     """
     Handle POST requests for deleting a book.
 
@@ -139,7 +138,7 @@ def delete_book(id):
     Returns:
         Redirect to home page after successful deletion.
     """
-    book = Book.query.get_or_404(id)
+    book = Book.query.get_or_404(book_id)
     author_id = book.author_id
 
     db.session.delete(book)
@@ -158,15 +157,15 @@ def delete_book(id):
 
 
 @app.errorhandler(404)
-def not_found_error(error):
+def not_found_error():
     return "Not Found", 404
 
 
 @app.errorhandler(405)
-def method_not_allowed_error(error):
+def method_not_allowed_error():
     return "Method Not Allowed", 405
 
 
 @app.errorhandler(500)
-def internal_server_error(error):
+def internal_server_error():
     return "Internal Server Error", 500
