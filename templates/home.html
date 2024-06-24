@@ -4,42 +4,61 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Book Library</title>
+    <link rel="stylesheet" href="../static/styles.css" />
   </head>
   <body>
-    <form method="get" action="/">
-      <label for="search">Search by Title:</label>
-      <input
-        type="text"
-        id="search"
-        name="search"
-        placeholder="earch books..."
-      />
-      <button type="submit">Search</button>
-    </form>
-    <form method="get" action="/">
-      <label for="sort">Sort by:</label>
-      <select name="sort" id="sort">
-        <option value="">Select</option>
-        <option value="title">Title</option>
-        <option value="author">Author</option>
-      </select>
-      <button type="submit">Sort</button>
-    </form>
+    <h1>Book Library</h1>
+    <div class="button-container">
+      <a href="{{ url_for('add_author') }}" class="button">Add Author</a>
+      <a href="{{ url_for('add_book') }}" class="button">Add Book</a>
+    </div>
+    <div class="search-sort-container">
+      <form method="get" action="/">
+        <label for="search">Search by book title or author name:</label>
+        <input
+          type="text"
+          id="search"
+          name="search"
+          placeholder="Search books..."
+        />
+        <button type="submit">Search</button>
+      </form>
+      <form method="get" action="/">
+        <label for="sort">Sort by:</label>
+        <select name="sort" id="sort">
+          <option value="">Select</option>
+          <option value="title">Title</option>
+          <option value="author">Author</option>
+        </select>
+        <button type="submit">Sort</button>
+      </form>
+    </div>
     <ul>
       {% for book in books %}
       <li>
-        <div>
-          <h3>{{ book.title }} by {{ authors[book.author_id].name}}</h3>
-        </div>
-
         {% if book.isbn %}
         <img
           src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg"
           alt="Cover Image"
         />
         {% else %}
-        <div>image not found</div>
+        <div class="no-image">No image</div>
         {% endif %}
+        <div class="book-info">
+          {% if book.author_id in authors %}
+          <h3>{{ book.title }} by {{ authors[book.author_id].name }}</h3>
+          {% else %}
+          <h3>{{ book.title }} by Unknown Author</h3>
+          {% endif %}
+        </div>
+        <form
+          class="delete-form"
+          action="{{ url_for('delete_book', id=book.id)}}"
+          method="POST"
+        >
+          <button type="submit">Delete Book</button>
+        </form>
       </li>
       {% endfor %}
     </ul>

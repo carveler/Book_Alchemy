@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, flash, redirect, url_for, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from data_models import db, Author, Book
@@ -6,7 +6,7 @@ import os
 
 
 app = Flask(__name__)  # Create an instance of the Flask application
-
+app.config["SECRET_KEY"] = "My_secret_key_here"
 database_path = os.path.join(os.getcwd(), "data", "library.sqlite")
 os.makedirs(os.path.dirname(database_path), exist_ok=True)
 print(database_path)
@@ -29,12 +29,16 @@ def home():
     search_query = request.args.get("search", "").strip()
 
     if search_query:
-        books = Book.query.join(Author).filter(
-            or_(
-                Book.title.ilike(f"%{search_query}%"),
-                Author.name.ilike(f"%{search_query}%"),
+        books = (
+            Book.query.join(Author)
+            .filter(
+                or_(
+                    Book.title.ilike(f"%{search_query}%"),
+                    Author.name.ilike(f"%{search_query}%"),
+                )
             )
-        ).all()
+            .all()
+        )
 
     else:
         books = Book.query.all()
@@ -100,6 +104,11 @@ def add_book():
         title = request.form.get("title")
         publication_year = request.form.get("publication_year")
         author_id = request.form.get("author_id")
+        author = Author.query.get(author_id)
+        if not author:
+            flash(f"Author with ID {author_id} does not exist.")
+            return redirect(url_for("add_book"))
+
         new_book = Book(
             isbn=isbn,
             title=title,
@@ -117,3 +126,47 @@ def add_book():
             print(f"Error occurred: {str(e)}")
 
     return render_template("add_book.html")
+
+
+@app.route("/book/<int:id>/delete", methods=["POST"])
+def delete_book(id):
+    """
+    Handle POST requests for deleting a book.
+
+    Args:
+        book_id (int): ID of the book to be deleted.
+
+    Returns:
+        Redirect to home page after successful deletion.
+    """
+    book = Book.query.get_or_404(id)
+    author_id = book.author_id
+
+    db.session.delete(book)
+    db.session.commit()
+    flash("Book deleted successfully.")
+
+    other_books = Book.query.filter_by(author_id=author_id).count()
+    if other_books == 0:
+        author = Author.query.get_or_404(author_id)
+        if author:
+            db.session.delete(author)
+            db.session.commit()
+            flash("Author deleted successfully.")
+
+    return redirect(url_for("home"))
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return "Not Found", 404
+
+
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    return "Method Not Allowed", 405
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return "Internal Server Error", 500
